@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Player com Interceptação de Vídeo</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<style>
+  body { margin:0; font-family:Arial; background:#f2f2f2; }
+  .top { padding:10px; background:#0b4f87; color:white; }
+  input { width:100%; padding:10px; margin:6px 0; }
+  button { padding:10px; width:100%; margin:6px 0; background:#0b4f87; color:white; border:0; }
+  video { width:100%; background:black; margin-top:10px; }
+  iframe { width:100%; height:70vh; border:0; margin-top:10px; }
+</style>
+</head>
+
+<body>
+
+<div class="top">Player + WebView + Intercept</div>
+
+<input id="urlInput" placeholder="Cole a URL">
+<button onclick="loadWeb()">Abrir no WebView</button>
+
+<video id="player" controls></video>
+
+<iframe id="web" src="about:blank"></iframe>
+
+<script>
+// Registrar Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(() => {
+    console.log("Service Worker registrado");
+  });
+}
+
+// Função para abrir site
+function loadWeb() {
+  const url = document.getElementById("urlInput").value.trim();
+  if(url) document.getElementById("web").src = fix(url);
+}
+
+// Arrumar URL sem https://
+function fix(u){
+  if(u.startsWith("http")) return u;
+  return "https://" + u;
+}
+
+// Recebe do Service Worker a URL do vídeo encontrada
+navigator.serviceWorker.addEventListener("message", event => {
+  const videoUrl = event.data;
+  console.log("Interceptado:", videoUrl);
+
+  const player = document.getElementById("player");
+  player.src = videoUrl;
+  player.play();
+});
+
+</script>
+</body>
+</html>
